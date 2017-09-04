@@ -12,6 +12,7 @@ import boxPlotVisualization from './box-plot';
 import cohortVisualization from './cohort';
 import mapVisualization from './map';
 import pivotVisualization from './pivot';
+import calendarVisualization from './calendar';
 
 function VisualizationProvider() {
   this.visualizations = {};
@@ -160,5 +161,6 @@ export default function (ngModule) {
   cohortVisualization(ngModule);
   mapVisualization(ngModule);
   pivotVisualization(ngModule);
+  calendarVisualization(ngModule);
   tableVisualization(ngModule);
 }

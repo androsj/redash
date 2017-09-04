@@ -332,7 +332,7 @@ counter-renderer {
 counter-renderer counter {
   margin: 0 auto;
   padding: 15px 50px;
-  display: block;;
+  display: block;
 }
 
 counter-renderer value,
@@ -356,6 +356,17 @@ counter-renderer counter.negative value {
 
 counter-renderer counter-name {
   font-size: 40px;
+  display: block;
+}
+
+calendar-renderer {
+  display: block;
+  text-align: center;
+}
+
+calendar-renderer #full-calendar {
+  margin: 0 auto;
+  padding: 15px 50px;
   display: block;
 }
 

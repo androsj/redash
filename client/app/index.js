@@ -43,11 +43,13 @@ import registerVisualizations from './visualizations';
 import markdownFilter from './filters/markdown';
 import dateTimeFilter from './filters/datetime';
 
+import './visualizations/calendar/calendar';
+
 const logger = debug('redash');
 
 const requirements = [
   ngRoute, ngResource, ngSanitize, uiBootstrap, ngMessages, uiSelect, 'angularMoment', toastr, 'ui.ace',
-  ngUpload, 'angularResizable', vsRepeat, 'ui.sortable', ngGridster.name,
+  ngUpload, 'angularResizable', vsRepeat, 'ui.sortable', ngGridster.name, 'ui.calendar',
 ];
 
 const ngModule = angular.module('app', requirements);
