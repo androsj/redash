@@ -35,11 +35,13 @@ function CalendarRenderer() {
           const eventTitleColName = $scope.options.eventTitleColName;
           const startDateColName = $scope.options.startDateColName;
           const endDateColName = $scope.options.endDateColName;
-          const newEvents = [];
 
           if (eventTitleColName === null || startDateColName === null || endDateColName === null) {
             return;
           }
+
+          // Clear events
+          $scope.eventSources[0].events.length = 0;
 
           _.each(queryData, (row) => {
             const title = row[eventTitleColName];
@@ -54,10 +56,9 @@ function CalendarRenderer() {
               start: start.format('YYYY-MM-DD'),
               end: end.format('YYYY-MM-DD'),
             };
-            newEvents.push(event);
-          });
 
-          $scope.eventSources[0].events = newEvents;
+            $scope.eventSources[0].events.push(event);
+          });
         }
       };
 
