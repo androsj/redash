@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import { values, _ } from 'underscore';
 import moment from 'moment';
 import template from './calendar.html';
 import editorTemplate from './calendar-editor.html';
@@ -13,9 +13,10 @@ function CalendarRenderer() {
     template,
     replace: false,
     controller($scope) {
-      $scope.eventSources = [{
-        events: [],
-      }];
+      $scope.eventSources = [];
+
+      // This is a hack to force the calendar directive to reload.
+      $scope.showCalendar = false;
 
       $scope.uiConfig = {
         calendar: {
@@ -29,7 +30,27 @@ function CalendarRenderer() {
         },
       };
 
+      const BaseColors = {
+        Blue: '#4572A7',
+        Red: '#AA4643',
+        Green: '#89A54E',
+        Purple: '#80699B',
+        Cyan: '#3D96AE',
+        Orange: '#DB843D',
+        'Light Blue': '#92A8CD',
+        Lilac: '#A47D7C',
+        'Light Green': '#B5CA92',
+        Brown: '#A52A2A',
+        Black: '#000000',
+        Gray: '#808080',
+        Pink: '#FFC0CB',
+        'Dark Blue': '#00008b',
+      };
+
+      const ColorPaletteArray = values(BaseColors);
+
       const refreshData = () => {
+        $scope.showCalendar = false;
         const queryData = $scope.queryResult.getData();
         if (queryData) {
           const eventTitleColName = $scope.options.eventTitleColName;
@@ -40,9 +61,10 @@ function CalendarRenderer() {
             return;
           }
 
-          // Clear events
-          $scope.eventSources[0].events.length = 0;
+          $scope.eventSources.length = 0;
+          $scope.showCalendar = true;
 
+          let colorIndex = 0;
           _.each(queryData, (row) => {
             const title = row[eventTitleColName];
             const start = row[startDateColName];
@@ -57,7 +79,15 @@ function CalendarRenderer() {
               end: end.format('YYYY-MM-DD'),
             };
 
-            $scope.eventSources[0].events.push(event);
+            const eventSource = {
+              events: [
+                event,
+              ],
+              color: ColorPaletteArray[colorIndex],
+            };
+
+            colorIndex = colorIndex === ColorPaletteArray.length - 1 ? 0 : colorIndex + 1;
+            $scope.eventSources.push(eventSource);
           });
         }
       };
@@ -87,18 +117,11 @@ export default function (ngModule) {
     const renderTemplate = '<calendar-renderer options="visualization.options" query-result="queryResult"></calendar-renderer>';
     const editTemplate = '<calendar-editor></calendar-editor>';
 
-    // const defaultOptions = {
-    //   eventTitleColName: '',
-    //   startDateColName: '',
-    //   endDateColName: '',
-    // };
-
     VisualizationProvider.registerVisualization({
       type: 'CALENDAR',
       name: 'Calendar',
       renderTemplate,
       editorTemplate: editTemplate,
-      // defaultOptions,
     });
   });
 }
