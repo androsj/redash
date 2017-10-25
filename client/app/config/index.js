@@ -26,6 +26,7 @@ import * as filters from '@/filters';
 import registerDirectives from '@/directives';
 import markdownFilter from '@/filters/markdown';
 import dateTimeFilter from '@/filters/datetime';
+import '@/visualizations/calendar/calendar';
 
 const logger = debug('redash:config');
 
@@ -44,6 +45,7 @@ const requirements = [
   vsRepeat,
   'ui.sortable',
   ngGridster.name,
+  'ui.calendar',
 ];
 
 const ngModule = angular.module('app', requirements);
