@@ -1,6 +1,6 @@
 {
   "name": "redash-client",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "dependencies": {
     "3d-view": {
       "version": "2.0.0",
@@ -795,6 +795,11 @@
       "version": "1.0.0",
       "from": "fs.realpath@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
+    },
+    "fullcalendar": {
+      "version": "3.6.2",
+      "from": "fullcalendar@latest",
+      "resolved": "https://registry.npmjs.org/fullcalendar/-/fullcalendar-3.6.2.tgz"
     },
     "function-bind": {
       "version": "1.1.0",
