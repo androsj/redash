@@ -25,6 +25,7 @@ import * as filters from '@/filters';
 import registerDirectives from '@/directives';
 import markdownFilter from '@/filters/markdown';
 import dateTimeFilter from '@/filters/datetime';
+import '@/visualizations/calendar/calendar';
 import dashboardGridOptions from './dashboard-grid-options';
 
 const logger = debug('redash:config');
@@ -51,6 +52,7 @@ const requirements = [
   'angularResizable',
   vsRepeat,
   'ui.sortable',
+  'ui.calendar',
 ];
 
 const ngModule = angular.module('app', requirements);
