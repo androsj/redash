@@ -1,4 +1,4 @@
-import { values, _ } from 'underscore';
+import { isUndefined, values, _ } from 'underscore';
 import moment from 'moment';
 import template from './calendar.html';
 import editorTemplate from './calendar-editor.html';
@@ -58,38 +58,48 @@ function CalendarRenderer() {
         $scope.showCalendar = false;
         const queryData = $scope.queryResult.getData();
         if (queryData) {
-          const eventTitleColName = $scope.options.eventTitleColName;
-          const startDateColName = $scope.options.startDateColName;
-          const endDateColName = $scope.options.endDateColName;
+          const eventTitle = $scope.options.eventTitle;
+          const startDate = $scope.options.startDate;
+          const endDate = $scope.options.endDate;
+          const groupBy = $scope.options.groupBy;
 
-          if (eventTitleColName === null || startDateColName === null || endDateColName === null) {
+          if (eventTitle === null || startDate === null || endDate === null) {
             return;
           }
 
           $scope.eventSources.length = 0;
           $scope.showCalendar = true;
+          let groupedEvents = [];
+
+          if (!isUndefined(groupBy)) {
+            groupedEvents = _.groupBy(queryData, groupBy);
+          } else {
+            groupedEvents[0] = queryData;
+          }
 
           let colorIndex = 0;
-          _.each(queryData, (row) => {
-            const title = row[eventTitleColName];
-            const start = row[startDateColName];
-            const end = row[endDateColName];
-
-            if (title === null || start === null || end === null ||
-              !moment.isMoment(start) || !moment.isMoment(end)) return;
-
-            const event = {
-              title,
-              start: start.format('YYYY-MM-DD'),
-              end: end.format('YYYY-MM-DD'),
-            };
-
+          _.each(groupedEvents, (type) => {
             const eventSource = {
-              events: [
-                event,
-              ],
+              events: [],
               color: ColorPaletteArray[colorIndex],
             };
+
+            _.each(type, (row) => {
+              const title = row[eventTitle];
+              const start = row[startDate];
+              const end = row[endDate];
+
+              if (title === null || start === null || end === null ||
+                !moment.isMoment(start) || !moment.isMoment(end)) return;
+
+              const event = {
+                title,
+                start: start.format('YYYY-MM-DD'),
+                end: end.format('YYYY-MM-DD'),
+              };
+
+              eventSource.events.push(event);
+            });
 
             colorIndex = colorIndex === ColorPaletteArray.length - 1 ? 0 : colorIndex + 1;
             $scope.eventSources.push(eventSource);

@@ -1,9 +1,11 @@
 <div>
+  <hr/>
+
   <div class="form-group">
-    <label class="control-label">Title Column Name</label>
-    <ui-select name="form-control" required ng-model="visualization.options.eventTitleColName">
+    <label class="control-label">Event Title</label>
+    <ui-select name="form-control" required ng-model="visualization.options.eventTitle">
       <ui-select-match placeholder="Choose column...">{{$select.selected}}</ui-select-match>
-      <ui-select-choices repeat="column in columnNames | remove:visualization.options.startDateColName | remove:visualization.options.endDateColName">
+      <ui-select-choices repeat="column in columnNames | remove:visualization.options.startDate | remove:visualization.options.endDate | remove:visualization.options.groupBy">
         <span ng-bind-html="column | highlight: $select.search"></span><span> </span>
         <small class="text-muted" ng-bind="columns[column].type"></small>
       </ui-select-choices>
@@ -11,10 +13,10 @@
   </div>
 
   <div class="form-group">
-    <label class="control-label">Start Date Column Name</label>
-    <ui-select name="form-control" required ng-model="visualization.options.startDateColName">
+    <label class="control-label">Start Date</label>
+    <ui-select name="form-control" required ng-model="visualization.options.startDate">
       <ui-select-match placeholder="Choose column...">{{$select.selected}}</ui-select-match>
-      <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventTitleColName | remove:visualization.options.endDateColName">
+      <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventTitle | remove:visualization.options.endDate | remove:visualization.options.groupBy">
         <span ng-bind-html="column | highlight: $select.search"></span><span> </span>
         <small class="text-muted" ng-bind="columns[column].type"></small>
       </ui-select-choices>
@@ -22,10 +24,23 @@
   </div>
 
   <div class="form-group">
-    <label class="control-label">End Date Column Name</label>
-    <ui-select name="form-control" required ng-model="visualization.options.endDateColName">
+    <label class="control-label">End Date</label>
+    <ui-select name="form-control" required ng-model="visualization.options.endDate">
       <ui-select-match placeholder="Choose column...">{{$select.selected}}</ui-select-match>
-      <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventTitleColName | remove:visualization.options.startDateColName">
+      <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventTitle | remove:visualization.options.startDate | remove:visualization.options.groupBy">
+        <span ng-bind-html="column | highlight: $select.search"></span><span> </span>
+        <small class="text-muted" ng-bind="columns[column].type"></small>
+      </ui-select-choices>
+    </ui-select>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label">Group by</label>
+    <ui-select name="groupby" ng-model="visualization.options.groupBy" class="clearable">
+      <ui-select-match allow-clear="true" placeholder="Choose column...">
+        {{$select.selected}}
+      </ui-select-match>
+      <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventTitle | remove:visualization.options.startDate | remove:visualization.options.endDate">
         <span ng-bind-html="column | highlight: $select.search"></span><span> </span>
         <small class="text-muted" ng-bind="columns[column].type"></small>
       </ui-select-choices>
