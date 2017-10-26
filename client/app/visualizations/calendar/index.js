@@ -12,7 +12,7 @@ function CalendarRenderer() {
     },
     template,
     replace: false,
-    controller($scope) {
+    controller($scope, uiCalendarConfig) {
       $scope.eventSources = [];
 
       // This is a hack to force the calendar directive to reload.
@@ -23,9 +23,14 @@ function CalendarRenderer() {
           height: 600,
           editable: false,
           header: {
-            left: 'title',
-            center: '',
-            right: 'today prev,next',
+            left: 'today prev,next',
+            center: 'title',
+            right: '',
+          },
+          themeSystem: 'bootstrap3',
+          bootstrapGlyphicons: {
+            prev: ' fa fa-chevron-left',
+            next: ' fa fa-chevron-right',
           },
         },
       };
@@ -90,6 +95,10 @@ function CalendarRenderer() {
             $scope.eventSources.push(eventSource);
           });
         }
+      };
+
+      $scope.changeView = (view, calendar) => {
+        uiCalendarConfig.calendars[calendar].fullCalendar('changeView', view);
       };
 
       $scope.$watch('options', refreshData, true);

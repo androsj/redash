@@ -359,15 +359,9 @@ counter-renderer counter-name {
   display: block;
 }
 
-calendar-renderer {
-  display: block;
-  text-align: center;
-}
-
-calendar-renderer #full-calendar {
+calendar-renderer .full-calendar {
   margin: 0 auto;
   padding: 15px 50px;
-  display: block;
 }
 
 .box {

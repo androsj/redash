@@ -1,1 +1,6 @@
-<div id="full-calendar" ui-calendar="uiConfig.calendar" ng-model="eventSources" ng-if="showCalendar"></div>
+<div class="btn-group full-calendar pull-right">
+  <button class="btn btn-default" ng-click="changeView('month', 'theCalendar')">Month</button>    
+  <button class="btn btn-default" ng-click="changeView('basicWeek', 'theCalendar')">Week</button>
+</div>
+
+<div class="full-calendar" ui-calendar="uiConfig.calendar" calendar="theCalendar" ng-model="eventSources" ng-if="showCalendar"></div>
