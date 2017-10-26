@@ -107,8 +107,8 @@ function CalendarRenderer() {
         }
       };
 
-      $scope.changeView = (view, calendar) => {
-        uiCalendarConfig.calendars[calendar].fullCalendar('changeView', view);
+      $scope.changeView = (view) => {
+        uiCalendarConfig.calendars.theCalendar.fullCalendar('changeView', view);
       };
 
       $scope.$watch('options', refreshData, true);
