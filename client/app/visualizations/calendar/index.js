@@ -1,5 +1,6 @@
 import { isUndefined, values, _ } from 'underscore';
 import moment from 'moment';
+import { getColumnCleanName } from '../../services/query-result';
 import template from './calendar.html';
 import editorTemplate from './calendar-editor.html';
 
@@ -12,11 +13,40 @@ function CalendarRenderer() {
     },
     template,
     replace: false,
-    controller($scope, uiCalendarConfig) {
+    controller($compile, $scope, clientConfig, uiCalendarConfig) {
       $scope.eventSources = [];
 
       // This is a hack to force the calendar directive to reload.
       $scope.showCalendar = false;
+
+      const nullToEmptyString = (value) => {
+        if (value !== null) {
+          return value;
+        }
+        return '';
+      };
+
+      const eventRender = (event, element) => {
+        const ignoredKeys = ['0', '1', 'allDay', 'className', 'source', 'title', '_id', '$$hashKey', $scope.options.eventTitle, $scope.options.startDate, $scope.options.endDate];
+
+        let popoverTemplate = "'<ul>";
+        _.each(event, (value, key) => {
+          if (!ignoredKeys.includes(key)) {
+            key = getColumnCleanName(key);
+
+            popoverTemplate += `<li><strong>${key}:</strong>
+            ${moment.isMoment(value) ? value.format(clientConfig.dateTimeFormat) : nullToEmptyString(value)}</li>`;
+          }
+        });
+        popoverTemplate += "</ul>'";
+
+        element.attr({
+          'uib-popover-html': popoverTemplate,
+          'popover-title': event.title,
+          'popover-trigger': "'mouseenter'",
+        });
+        $compile(element)($scope);
+      };
 
       $scope.uiConfig = {
         calendar: {
@@ -32,6 +62,7 @@ function CalendarRenderer() {
             prev: ' fa fa-chevron-left',
             next: ' fa fa-chevron-right',
           },
+          eventRender,
         },
       };
 
@@ -63,9 +94,7 @@ function CalendarRenderer() {
           const endDate = $scope.options.endDate;
           const groupBy = $scope.options.groupBy;
 
-          if (eventTitle === null || startDate === null || endDate === null) {
-            return;
-          }
+          if (eventTitle === null || startDate === null) return;
 
           $scope.eventSources.length = 0;
           $scope.showCalendar = true;
@@ -89,13 +118,13 @@ function CalendarRenderer() {
               const start = row[startDate];
               const end = row[endDate];
 
-              if (title === null || start === null || end === null ||
-                !moment.isMoment(start) || !moment.isMoment(end)) return;
+              if (title === null || start === null) return;
 
               const event = {
                 title,
-                start: start.format('YYYY-MM-DD'),
-                end: end.format('YYYY-MM-DD'),
+                start,
+                end,
+                ...row,
               };
 
               eventSource.events.push(event);
