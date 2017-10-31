@@ -1,4 +1,5 @@
-import { isUndefined, values, _ } from 'underscore';
+import { isUndefined, _ } from 'underscore';
+import d3 from 'd3';
 import moment from 'moment';
 import { getColumnCleanName } from '../../services/query-result';
 import template from './calendar.html';
@@ -14,6 +15,7 @@ function CalendarRenderer() {
     template,
     replace: false,
     controller($compile, $scope, clientConfig, uiCalendarConfig) {
+      const colorScale = d3.scale.category10();
       $scope.eventSources = [];
 
       // This is a hack to force the calendar directive to reload.
@@ -68,28 +70,10 @@ function CalendarRenderer() {
         },
       };
 
-      const BaseColors = {
-        Blue: '#4572A7',
-        Red: '#AA4643',
-        Green: '#89A54E',
-        Purple: '#80699B',
-        Cyan: '#3D96AE',
-        Orange: '#DB843D',
-        'Light Blue': '#92A8CD',
-        Lilac: '#A47D7C',
-        'Light Green': '#B5CA92',
-        Brown: '#A52A2A',
-        Black: '#000000',
-        Gray: '#808080',
-        Pink: '#FFC0CB',
-        'Dark Blue': '#00008b',
-      };
-
-      const ColorPaletteArray = values(BaseColors);
-
       const refreshData = () => {
         $scope.showCalendar = false;
         const queryData = $scope.queryResult.getData();
+
         if (queryData) {
           const eventTitle = $scope.options.eventTitle;
           const startDate = $scope.options.startDate;
@@ -100,22 +84,31 @@ function CalendarRenderer() {
 
           $scope.eventSources.length = 0;
           $scope.showCalendar = true;
-          let groupedEvents = [];
 
+          let groupedEvents;
           if (!isUndefined(groupBy)) {
             groupedEvents = _.groupBy(queryData, groupBy);
           } else {
-            groupedEvents[0] = queryData;
+            groupedEvents = { All: queryData };
           }
 
-          let colorIndex = 0;
-          _.each(groupedEvents, (type) => {
+          const groupNames = _.keys(groupedEvents);
+          const options = _.map(groupNames, (group) => {
+            if ($scope.options.groups && $scope.options.groups[group]) {
+              return $scope.options.groups[group];
+            }
+            return { color: colorScale(group) };
+          });
+
+          $scope.options.groups = _.object(groupNames, options);
+
+          _.each(groupedEvents, (events, type) => {
             const eventSource = {
               events: [],
-              color: ColorPaletteArray[colorIndex],
+              color: $scope.options.groups[type].color,
             };
 
-            _.each(type, (row) => {
+            _.each(events, (row) => {
               const title = row[eventTitle];
               const start = row[startDate];
               const end = row[endDate];
@@ -132,7 +125,6 @@ function CalendarRenderer() {
               eventSource.events.push(event);
             });
 
-            colorIndex = colorIndex === ColorPaletteArray.length - 1 ? 0 : colorIndex + 1;
             $scope.eventSources.push(eventSource);
           });
         }
@@ -153,6 +145,7 @@ function CalendarEditor() {
     restrict: 'E',
     template: editorTemplate,
     link($scope) {
+      $scope.currentTab = 'general';
       $scope.columns = $scope.queryResult.getColumns();
       $scope.columnNames = _.pluck($scope.columns, 'name');
     },
