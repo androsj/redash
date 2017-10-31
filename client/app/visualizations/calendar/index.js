@@ -44,6 +44,8 @@ function CalendarRenderer() {
           'uib-popover-html': popoverTemplate,
           'popover-title': event.title,
           'popover-trigger': "'mouseenter'",
+          'popover-placement': 'auto top-left',
+          'popover-append-to-body': true,
         });
         $compile(element)($scope);
       };
