@@ -5,7 +5,7 @@ import { getColumnCleanName } from '../../services/query-result';
 import template from './calendar.html';
 import editorTemplate from './calendar-editor.html';
 
-function CalendarRenderer() {
+function CalendarRenderer(clientConfig, uiCalendarConfig) {
   return {
     restrict: 'E',
     scope: {
@@ -14,12 +14,22 @@ function CalendarRenderer() {
     },
     template,
     replace: false,
-    controller($compile, $scope, clientConfig, uiCalendarConfig) {
+    controller($compile, $scope) {
       const colorScale = d3.scale.category10();
-      $scope.eventSources = [];
 
-      // This is a hack to force the calendar directive to reload.
-      $scope.showCalendar = false;
+      $scope.eventSources = [];
+      $scope.options.currentView = $scope.options.currentView || 'month';
+      $scope.calendarViews = {
+        month: 'Month (Basic)',
+        basicWeek: 'Week (Basic)',
+        basicDay: 'Day (Basic)',
+        agendaWeek: 'Week (Agenda)',
+        agendaDay: 'Day (Agenda)',
+        listYear: 'Year (List)',
+        listMonth: 'Month (List)',
+        listWeek: 'Week (List)',
+        listDay: 'Day (List)',
+      };
 
       const nullToEmptyString = (value) => {
         if (value !== null) {
@@ -55,6 +65,7 @@ function CalendarRenderer() {
       $scope.uiConfig = {
         calendar: {
           height: 600,
+          defaultView: $scope.options.currentView,
           editable: false,
           header: {
             left: 'today prev,next',
@@ -71,7 +82,6 @@ function CalendarRenderer() {
       };
 
       const refreshData = () => {
-        $scope.showCalendar = false;
         const queryData = $scope.queryResult.getData();
 
         if (queryData) {
@@ -83,9 +93,8 @@ function CalendarRenderer() {
           if (eventTitle === null || startDate === null) return;
 
           $scope.eventSources.length = 0;
-          $scope.showCalendar = true;
-
           let groupedEvents;
+
           if (!isUndefined(groupBy)) {
             groupedEvents = _.groupBy(queryData, groupBy);
           } else {
@@ -132,6 +141,7 @@ function CalendarRenderer() {
 
       $scope.changeView = (view) => {
         uiCalendarConfig.calendars.theCalendar.fullCalendar('changeView', view);
+        $scope.options.currentView = view;
       };
 
       $scope.$watch('options', refreshData, true);

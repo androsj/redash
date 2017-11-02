@@ -1,23 +1,12 @@
 <div class="pull-right t-header">
   <div class="btn-group dropdown" uib-dropdown="">
     <button type="button" class="btn btn-default btn-sm dropdown-toggle" aria-haspopup="true" uib-dropdown-toggle="" aria-expanded="false">
-      Change Calendar View <span class="caret"></span>
+      {{calendarViews[options.currentView]}} <span class="caret"></span>
     </button>
     <ul class="dropdown-menu pull-right" uib-dropdown-menu="">
-      <li class="dropdown-header">Basic</li>
-      <li><a ng-click="changeView('month')">Month</a></li>
-      <li><a ng-click="changeView('basicWeek')">Week</a></li>
-      <li><a ng-click="changeView('basicDay')">Day</a></li>
-      <li class="dropdown-header">Agenda</li>
-      <li><a ng-click="changeView('agendaWeek')">Week</a></li>
-      <li><a ng-click="changeView('agendaDay')">Day</a></li>
-      <li class="dropdown-header">List</li>
-      <li><a ng-click="changeView('listYear')">Year</a></li>
-      <li><a ng-click="changeView('listMonth')">Month</a></li>
-      <li><a ng-click="changeView('listWeek')">Week</a></li>
-      <li><a ng-click="changeView('listDay')">Day</a></li>
+      <li ng-repeat="(view, name) in calendarViews"><a ng-click="changeView(view)">{{name}}</a></li>
     </ul>
   </div>
 </div>
 
-<div class="t-header" ui-calendar="uiConfig.calendar" calendar="theCalendar" ng-model="eventSources" ng-if="showCalendar"></div>
+<div class="t-header" ui-calendar="uiConfig.calendar" calendar="theCalendar" ng-model="eventSources"></div>
