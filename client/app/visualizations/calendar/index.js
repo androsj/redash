@@ -39,7 +39,7 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
       };
 
       const eventRender = (event, element) => {
-        const ignoredKeys = ['0', '1', 'allDay', 'className', 'source', 'title', '_id', '$$hashKey', $scope.options.eventTitle, $scope.options.startDate, $scope.options.endDate];
+        const ignoredKeys = ['0', '1', 'allDay', 'className', 'source', 'title', '_id', '$$hashKey', $scope.options.eventTitle, $scope.options.startDate, isUndefined($scope.options.endDate) ? 'end' : $scope.options.endDate];
 
         let popoverTemplate = "'<ul>";
         _.each(event, (value, key) => {
@@ -127,7 +127,7 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
               const event = {
                 title,
                 start,
-                end,
+                ...endDate && { end },
                 ...row,
               };
 
