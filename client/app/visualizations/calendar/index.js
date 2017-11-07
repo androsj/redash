@@ -20,15 +20,15 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
       $scope.eventSources = [];
       $scope.options.currentView = $scope.options.currentView || 'month';
       $scope.calendarViews = {
-        month: 'Month (Basic)',
-        basicWeek: 'Week (Basic)',
-        basicDay: 'Day (Basic)',
-        agendaWeek: 'Week (Agenda)',
-        agendaDay: 'Day (Agenda)',
-        listYear: 'Year (List)',
-        listMonth: 'Month (List)',
-        listWeek: 'Week (List)',
-        listDay: 'Day (List)',
+        month: { label: 'Month (Basic)', popoverPlacement: 'auto top-left' },
+        basicWeek: { label: 'Week (Basic)', popoverPlacement: 'auto top-left' },
+        basicDay: { label: 'Day (Basic)', popoverPlacement: 'auto top-left' },
+        agendaWeek: { label: 'Week (Agenda)', popoverPlacement: 'auto left' },
+        agendaDay: { label: 'Day (Agenda)', popoverPlacement: 'auto right' },
+        listYear: { label: 'Year (List)', popoverPlacement: 'auto top-left' },
+        listMonth: { label: 'Month (List)', popoverPlacement: 'auto top-left' },
+        listWeek: { label: 'Week (List)', popoverPlacement: 'auto top-left' },
+        listDay: { label: 'Day (List)', popoverPlacement: 'auto top-left' },
       };
 
       const nullToEmptyString = (value) => {
@@ -55,8 +55,8 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
         element.attr({
           'uib-popover-html': popoverTemplate,
           'popover-title': event.title,
-          'popover-trigger': "'mouseenter'",
-          'popover-placement': 'auto top-left',
+          'popover-trigger': "'outsideClick'",
+          'popover-placement': $scope.calendarViews[$scope.options.currentView].popoverPlacement,
           'popover-append-to-body': true,
         });
         $compile(element)($scope);

@@ -1,10 +1,10 @@
 <div class="pull-right t-header">
   <div class="btn-group dropdown" uib-dropdown="">
     <button type="button" class="btn btn-default btn-sm dropdown-toggle" aria-haspopup="true" uib-dropdown-toggle="" aria-expanded="false">
-      {{calendarViews[options.currentView]}} <span class="caret"></span>
+      {{calendarViews[options.currentView].label}} <span class="caret"></span>
     </button>
     <ul class="dropdown-menu pull-right" uib-dropdown-menu="">
-      <li ng-repeat="(view, name) in calendarViews"><a ng-click="changeView(view)">{{name}}</a></li>
+      <li ng-repeat="(view, info) in calendarViews"><a ng-click="changeView(view)">{{info.label}}</a></li>
     </ul>
   </div>
 </div>
