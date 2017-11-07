@@ -62,22 +62,28 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
         $compile(element)($scope);
       };
 
+      const viewRender = (view) => {
+        $scope.options.currentView = view.name;
+      };
+
       $scope.uiConfig = {
         calendar: {
           height: 600,
           defaultView: $scope.options.currentView,
           editable: false,
           header: {
-            left: 'today prev,next',
+            left: 'prev,next today',
             center: 'title',
             right: '',
           },
+          navLinks: true,
           themeSystem: 'bootstrap3',
           bootstrapGlyphicons: {
             prev: ' fa fa-chevron-left',
             next: ' fa fa-chevron-right',
           },
           eventRender,
+          viewRender,
         },
       };
 
@@ -141,7 +147,6 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
 
       $scope.changeView = (view) => {
         uiCalendarConfig.calendars.theCalendar.fullCalendar('changeView', view);
-        $scope.options.currentView = view;
       };
 
       $scope.$watch('options', refreshData, true);
