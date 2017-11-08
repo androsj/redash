@@ -23,8 +23,8 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
         month: { label: 'Month (Basic)', popoverPlacement: 'auto top-left' },
         basicWeek: { label: 'Week (Basic)', popoverPlacement: 'auto top-left' },
         basicDay: { label: 'Day (Basic)', popoverPlacement: 'auto top-left' },
-        agendaWeek: { label: 'Week (Agenda)', popoverPlacement: 'auto left' },
-        agendaDay: { label: 'Day (Agenda)', popoverPlacement: 'auto right' },
+        agendaWeek: { label: 'Week (Agenda)', popoverPlacement: 'auto top-left' },
+        agendaDay: { label: 'Day (Agenda)', popoverPlacement: 'auto top-left' },
         listYear: { label: 'Year (List)', popoverPlacement: 'auto top-left' },
         listMonth: { label: 'Month (List)', popoverPlacement: 'auto top-left' },
         listWeek: { label: 'Week (List)', popoverPlacement: 'auto top-left' },
@@ -66,23 +66,31 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
         $scope.options.currentView = view.name;
       };
 
+      $scope.changeView = (view) => {
+        uiCalendarConfig.calendars.theCalendar.fullCalendar('changeView', view);
+      };
+
       $scope.uiConfig = {
         calendar: {
-          height: 600,
+          height: 'auto',
           defaultView: $scope.options.currentView,
           editable: false,
+          eventLimit: $scope.options.eventLimit,
+          firstDay: $scope.options.firstDay,
           header: {
             left: 'prev,next today',
             center: 'title',
             right: '',
           },
           navLinks: true,
+          weekends: $scope.options.weekends,
+          weekNumbers: $scope.options.weekNumbers,
           themeSystem: 'bootstrap3',
           bootstrapGlyphicons: {
             prev: ' fa fa-chevron-left',
             next: ' fa fa-chevron-right',
           },
-          eventRender,
+          ...$scope.options.showPopover && { eventRender },
           viewRender,
         },
       };
@@ -95,11 +103,11 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
           const startDate = $scope.options.startDate;
           const endDate = $scope.options.endDate;
           const groupBy = $scope.options.groupBy;
+          let groupedEvents;
 
           if (eventTitle === null || startDate === null) return;
 
           $scope.eventSources.length = 0;
-          let groupedEvents;
 
           if (!isUndefined(groupBy)) {
             groupedEvents = _.groupBy(queryData, groupBy);
@@ -145,10 +153,6 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
         }
       };
 
-      $scope.changeView = (view) => {
-        uiCalendarConfig.calendars.theCalendar.fullCalendar('changeView', view);
-      };
-
       $scope.$watch('options', refreshData, true);
       $scope.$watch('queryResult && queryResult.getData()', refreshData);
     },
@@ -163,6 +167,15 @@ function CalendarEditor() {
       $scope.currentTab = 'general';
       $scope.columns = $scope.queryResult.getColumns();
       $scope.columnNames = _.pluck($scope.columns, 'name');
+      $scope.weekDays = [
+        { name: 'Sunday', value: 0 },
+        { name: 'Monday', value: 1 },
+        { name: 'Tuesday', value: 2 },
+        { name: 'Wednesday', value: 3 },
+        { name: 'Thursday', value: 4 },
+        { name: 'Friday', value: 5 },
+        { name: 'Saturday', value: 6 },
+      ];
     },
   };
 }
@@ -175,11 +188,20 @@ export default function (ngModule) {
     const renderTemplate = '<calendar-renderer options="visualization.options" query-result="queryResult"></calendar-renderer>';
     const editTemplate = '<calendar-editor></calendar-editor>';
 
+    const defaultOptions = {
+      eventLimit: false,
+      firstDay: 0,
+      showPopover: true,
+      weekends: true,
+      weekNumbers: false,
+    };
+
     VisualizationProvider.registerVisualization({
       type: 'CALENDAR',
       name: 'Calendar',
       renderTemplate,
       editorTemplate: editTemplate,
+      defaultOptions,
     });
   });
 }

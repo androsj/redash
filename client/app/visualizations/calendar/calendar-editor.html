@@ -3,6 +3,7 @@
   <ul class="tab-nav">
     <li ng-class="{active: currentTab == 'general'}"><a ng-click="currentTab='general'">General</a></li>
     <li ng-class="{active: currentTab == 'groups'}"><a ng-click="currentTab='groups'">Groups</a></li>
+    <li ng-class="{active: currentTab == 'settings'}"><a ng-click="currentTab='settings'">Calendar Settings</a></li>
   </ul>
 
   <div ng-show="currentTab == 'general'">
@@ -70,6 +71,42 @@
       </tr>
       </tbody>
     </table>
+  </div>
+
+  <div ng-show="currentTab == 'settings'">
+    <div class="form-group">
+      <label class="control-label">First day of the week</label>
+      <select ng-options="day.value as day.name for day in weekDays" ng-model="visualization.options.firstDay"
+              class="form-control"></select>
+    </div>
+
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-model="visualization.options.weekends">
+        <i class="input-helper"></i> Show weekends
+      </label>
+    </div>
+
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-model="visualization.options.weekNumbers">
+        <i class="input-helper"></i> Show week numbers
+      </label>
+    </div>
+
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-model="visualization.options.eventLimit">
+        <i class="input-helper"></i> Limit events per day
+      </label>
+    </div>
+
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" ng-model="visualization.options.showPopover">
+        <i class="input-helper"></i> Show event details when pressed
+      </label>
+    </div>
   </div>
 
 </div>
