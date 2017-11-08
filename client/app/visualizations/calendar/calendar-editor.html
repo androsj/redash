@@ -74,6 +74,17 @@
   </div>
 
   <div ng-show="currentTab == 'settings'">
+    <!-- not using regular validation (chartEditor.yAxisColumns.$invalid) due to a bug in ui-select with multiple choices-->
+    <div class="form-group" ng-class="{'has-error': !visualization.options.views || visualization.options.views.length == 0}">
+      <label class="control-label">Available Views</label>
+      <ui-select multiple name="calendarViews" required ng-model="visualization.options.views">
+        <ui-select-match placeholder="Choose views...">{{$item}}</ui-select-match>
+        <ui-select-choices repeat="view in calendarViews">
+          <span ng-bind-html="view | highlight: $select.search"></span><span> </span>
+        </ui-select-choices>
+      </ui-select>
+    </div>
+
     <div class="form-group">
       <label class="control-label">First day of the week</label>
       <select ng-options="day.value as day.name for day in weekDays" ng-model="visualization.options.firstDay"

@@ -5,7 +5,7 @@ import { getColumnCleanName } from '../../services/query-result';
 import template from './calendar.html';
 import editorTemplate from './calendar-editor.html';
 
-function CalendarRenderer(clientConfig, uiCalendarConfig) {
+function CalendarRenderer(clientConfig) {
   return {
     restrict: 'E',
     scope: {
@@ -16,20 +16,7 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
     replace: false,
     controller($compile, $scope) {
       const colorScale = d3.scale.category10();
-
       $scope.eventSources = [];
-      $scope.options.currentView = $scope.options.currentView || 'month';
-      $scope.calendarViews = {
-        month: { label: 'Month (Basic)', popoverPlacement: 'auto top-left' },
-        basicWeek: { label: 'Week (Basic)', popoverPlacement: 'auto top-left' },
-        basicDay: { label: 'Day (Basic)', popoverPlacement: 'auto top-left' },
-        agendaWeek: { label: 'Week (Agenda)', popoverPlacement: 'auto top-left' },
-        agendaDay: { label: 'Day (Agenda)', popoverPlacement: 'auto top-left' },
-        listYear: { label: 'Year (List)', popoverPlacement: 'auto top-left' },
-        listMonth: { label: 'Month (List)', popoverPlacement: 'auto top-left' },
-        listWeek: { label: 'Week (List)', popoverPlacement: 'auto top-left' },
-        listDay: { label: 'Day (List)', popoverPlacement: 'auto top-left' },
-      };
 
       const nullToEmptyString = (value) => {
         if (value !== null) {
@@ -56,7 +43,7 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
           'uib-popover-html': popoverTemplate,
           'popover-title': event.title,
           'popover-trigger': "'outsideClick'",
-          'popover-placement': $scope.calendarViews[$scope.options.currentView].popoverPlacement,
+          'popover-placement': 'auto top-left',
           'popover-append-to-body': true,
         });
         $compile(element)($scope);
@@ -64,10 +51,6 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
 
       const viewRender = (view) => {
         $scope.options.currentView = view.name;
-      };
-
-      $scope.changeView = (view) => {
-        uiCalendarConfig.calendars.theCalendar.fullCalendar('changeView', view);
       };
 
       $scope.uiConfig = {
@@ -80,7 +63,7 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
           header: {
             left: 'prev,next today',
             center: 'title',
-            right: '',
+            right: $scope.options.views.join(),
           },
           navLinks: true,
           weekends: $scope.options.weekends,
@@ -92,6 +75,17 @@ function CalendarRenderer(clientConfig, uiCalendarConfig) {
           },
           ...$scope.options.showPopover && { eventRender },
           viewRender,
+          views: {
+            month: { buttonText: 'Month (Basic)' },
+            basicWeek: { buttonText: 'Week (Basic)' },
+            basicDay: { buttonText: 'Day (Basic)' },
+            agendaWeek: { buttonText: 'Week (Agenda)' },
+            agendaDay: { buttonText: 'Day (Agenda)' },
+            listYear: { buttonText: 'Year (List)' },
+            listMonth: { buttonText: 'Month (List)' },
+            listWeek: { buttonText: 'Week (List)' },
+            listDay: { buttonText: 'Day (List)' },
+          },
         },
       };
 
@@ -167,6 +161,17 @@ function CalendarEditor() {
       $scope.currentTab = 'general';
       $scope.columns = $scope.queryResult.getColumns();
       $scope.columnNames = _.pluck($scope.columns, 'name');
+      $scope.calendarViews = [
+        'month',
+        'basicWeek',
+        'basicDay',
+        'agendaWeek',
+        'agendaDay',
+        'listYear',
+        'listMonth',
+        'listWeek',
+        'listDay',
+      ];
       $scope.weekDays = [
         { name: 'Sunday', value: 0 },
         { name: 'Monday', value: 1 },
@@ -194,6 +199,12 @@ export default function (ngModule) {
       showPopover: true,
       weekends: true,
       weekNumbers: false,
+      views: [
+        'month',
+        'agendaWeek',
+        'agendaDay',
+        'listWeek',
+      ],
     };
 
     VisualizationProvider.registerVisualization({
