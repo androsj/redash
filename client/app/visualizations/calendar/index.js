@@ -16,7 +16,10 @@ function CalendarRenderer(clientConfig) {
     replace: false,
     controller($compile, $scope) {
       const colorScale = d3.scale.category10();
-      $scope.eventSources = [];
+      $scope.calendarEvents = [];
+
+      // Compile events with popover attributes into this child scope so we can destroy them later.
+      let eventScope;
 
       const nullToEmptyString = (value) => {
         if (value !== null) {
@@ -26,8 +29,14 @@ function CalendarRenderer(clientConfig) {
       };
 
       const eventRender = (event, element) => {
-        const ignoredKeys = ['0', '1', 'allDay', 'className', 'source', 'title', '_id', '$$hashKey', $scope.options.eventTitle, $scope.options.startDate, isUndefined($scope.options.endDate) ? 'end' : $scope.options.endDate];
+        // create the child scope for the event elements
+        if (eventScope === undefined) {
+          eventScope = $scope.$new(true);
+        }
 
+        const ignoredKeys = ['0', '1', 'allDay', 'className', 'source', 'title', '_id', '$$hashKey', $scope.options.eventConfig.title, $scope.options.eventConfig.start, isUndefined($scope.options.eventConfig.end) ? 'end' : $scope.options.eventConfig.end];
+
+        // Build template
         let popoverTemplate = "'<ul>";
         _.each(event, (value, key) => {
           if (!ignoredKeys.includes(key)) {
@@ -46,62 +55,75 @@ function CalendarRenderer(clientConfig) {
           'popover-placement': 'auto top-left',
           'popover-append-to-body': true,
         });
-        $compile(element)($scope);
+
+        let newElement = $compile(element)(eventScope);
+
+        eventScope.$on('$destroy', () => {
+          newElement.remove();
+          newElement = undefined;
+        });
       };
 
-      const viewRender = (view) => {
-        $scope.options.currentView = view.name;
+      const eventDestroy = () => {
+        if (eventScope) {
+          eventScope.$destroy();
+          eventScope = undefined;
+        }
       };
 
-      $scope.uiConfig = {
-        calendar: {
-          height: 'auto',
-          defaultView: $scope.options.currentView,
-          editable: false,
-          eventLimit: $scope.options.eventLimit,
-          firstDay: $scope.options.firstDay,
-          header: {
-            left: 'prev,next today',
-            center: 'title',
-            right: $scope.options.views.join(),
+      const updateConfig = () => {
+        $scope.uiConfig = {
+          calendar: {
+            height: 'auto',
+            defaultView: $scope.options.calendarConfig.views[0] || 'month',
+            editable: false,
+            eventLimit: $scope.options.calendarConfig.eventLimit,
+            firstDay: $scope.options.calendarConfig.firstDay,
+            header: {
+              left: 'prev,next today',
+              center: 'title',
+              right: $scope.options.calendarConfig.views.join(),
+            },
+            navLinks: true,
+            weekends: $scope.options.calendarConfig.weekends,
+            weekNumbers: $scope.options.calendarConfig.weekNumbers,
+            themeSystem: 'bootstrap3',
+            bootstrapGlyphicons: {
+              prev: ' fa fa-chevron-left',
+              next: ' fa fa-chevron-right',
+            },
+            ...$scope.options.calendarConfig.showPopover && { eventRender },
+            ...$scope.options.calendarConfig.showPopover && { eventDestroy },
+            views: {
+              month: { buttonText: 'Month' },
+              basicWeek: { buttonText: 'Week' },
+              basicDay: { buttonText: 'Day' },
+              agendaWeek: { buttonText: 'Week (Agenda)' },
+              agendaDay: { buttonText: 'Day (Agenda)' },
+              listYear: { buttonText: 'Year (List)' },
+              listMonth: { buttonText: 'Month (List)' },
+              listWeek: { buttonText: 'Week (List)' },
+              listDay: { buttonText: 'Day (List)' },
+            },
           },
-          navLinks: true,
-          weekends: $scope.options.weekends,
-          weekNumbers: $scope.options.weekNumbers,
-          themeSystem: 'bootstrap3',
-          bootstrapGlyphicons: {
-            prev: ' fa fa-chevron-left',
-            next: ' fa fa-chevron-right',
-          },
-          ...$scope.options.showPopover && { eventRender },
-          viewRender,
-          views: {
-            month: { buttonText: 'Month (Basic)' },
-            basicWeek: { buttonText: 'Week (Basic)' },
-            basicDay: { buttonText: 'Day (Basic)' },
-            agendaWeek: { buttonText: 'Week (Agenda)' },
-            agendaDay: { buttonText: 'Day (Agenda)' },
-            listYear: { buttonText: 'Year (List)' },
-            listMonth: { buttonText: 'Month (List)' },
-            listWeek: { buttonText: 'Week (List)' },
-            listDay: { buttonText: 'Day (List)' },
-          },
-        },
+        };
       };
 
-      const refreshData = () => {
+      // initialize calendar config
+      updateConfig();
+
+      const generateEvents = () => {
         const queryData = $scope.queryResult.getData();
+        $scope.calendarEvents.length = 0;
 
         if (queryData) {
-          const eventTitle = $scope.options.eventTitle;
-          const startDate = $scope.options.startDate;
-          const endDate = $scope.options.endDate;
-          const groupBy = $scope.options.groupBy;
+          const eventTitle = $scope.options.eventConfig.title;
+          const startDate = $scope.options.eventConfig.start;
+          const endDate = $scope.options.eventConfig.end;
+          const groupBy = $scope.options.eventConfig.groupBy;
           let groupedEvents;
 
           if (eventTitle === null || startDate === null) return;
-
-          $scope.eventSources.length = 0;
 
           if (!isUndefined(groupBy)) {
             groupedEvents = _.groupBy(queryData, groupBy);
@@ -111,18 +133,18 @@ function CalendarRenderer(clientConfig) {
 
           const groupNames = _.keys(groupedEvents);
           const options = _.map(groupNames, (group) => {
-            if ($scope.options.groups && $scope.options.groups[group]) {
-              return $scope.options.groups[group];
+            if ($scope.options.eventConfig.groups && $scope.options.eventConfig.groups[group]) {
+              return $scope.options.eventConfig.groups[group];
             }
             return { color: colorScale(group) };
           });
 
-          $scope.options.groups = _.object(groupNames, options);
+          $scope.options.eventConfig.groups = _.object(groupNames, options);
 
           _.each(groupedEvents, (events, type) => {
-            const eventSource = {
+            const eventGroup = {
               events: [],
-              color: $scope.options.groups[type].color,
+              color: $scope.options.eventConfig.groups[type].color,
             };
 
             _.each(events, (row) => {
@@ -139,16 +161,25 @@ function CalendarRenderer(clientConfig) {
                 ...row,
               };
 
-              eventSource.events.push(event);
+              eventGroup.events.push(event);
             });
 
-            $scope.eventSources.push(eventSource);
+            $scope.calendarEvents.push(eventGroup);
           });
         }
       };
 
-      $scope.$watch('options', refreshData, true);
-      $scope.$watch('queryResult && queryResult.getData()', refreshData);
+      $scope.$on('$destroy', () => {
+        if (eventScope) {
+          eventScope.$destroy();
+          eventScope = undefined;
+        }
+        $scope.calendarEvents.length = 0;
+      });
+
+      $scope.$watch('options.eventConfig', generateEvents, true);
+      $scope.$watch('options.calendarConfig', updateConfig, true);
+      $scope.$watch('queryResult && queryResult.getData()', generateEvents);
     },
   };
 }
@@ -194,17 +225,20 @@ export default function (ngModule) {
     const editTemplate = '<calendar-editor></calendar-editor>';
 
     const defaultOptions = {
-      eventLimit: false,
-      firstDay: 0,
-      showPopover: true,
-      weekends: true,
-      weekNumbers: false,
-      views: [
-        'month',
-        'agendaWeek',
-        'agendaDay',
-        'listWeek',
-      ],
+      calendarConfig: {
+        eventLimit: false,
+        firstDay: 0,
+        showPopover: true,
+        weekends: true,
+        weekNumbers: false,
+        views: [
+          'month',
+          'agendaWeek',
+          'agendaDay',
+          'listWeek',
+        ],
+      },
+      eventConfig: {},
     };
 
     VisualizationProvider.registerVisualization({

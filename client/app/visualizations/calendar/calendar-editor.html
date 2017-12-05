@@ -9,9 +9,9 @@
   <div ng-show="currentTab == 'general'">
     <div class="form-group">
       <label class="control-label">Event Title</label>
-      <ui-select name="form-control" required ng-model="visualization.options.eventTitle">
+      <ui-select name="form-control" required ng-model="visualization.options.eventConfig.title">
         <ui-select-match placeholder="Choose column...">{{$select.selected}}</ui-select-match>
-        <ui-select-choices repeat="column in columnNames | remove:visualization.options.startDate | remove:visualization.options.endDate | remove:visualization.options.groupBy">
+        <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventConfig.start | remove:visualization.options.eventConfig.end | remove:visualization.options.eventConfig.groupBy">
           <span ng-bind-html="column | highlight: $select.search"></span><span> </span>
           <small class="text-muted" ng-bind="columns[column].type"></small>
         </ui-select-choices>
@@ -20,9 +20,9 @@
 
     <div class="form-group">
       <label class="control-label">Start Date</label>
-      <ui-select name="form-control" required ng-model="visualization.options.startDate">
+      <ui-select name="form-control" required ng-model="visualization.options.eventConfig.start">
         <ui-select-match placeholder="Choose column...">{{$select.selected}}</ui-select-match>
-        <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventTitle | remove:visualization.options.endDate | remove:visualization.options.groupBy">
+        <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventConfig.title | remove:visualization.options.eventConfig.end | remove:visualization.options.eventConfig.groupBy">
           <span ng-bind-html="column | highlight: $select.search"></span><span> </span>
           <small class="text-muted" ng-bind="columns[column].type"></small>
         </ui-select-choices>
@@ -31,11 +31,11 @@
 
     <div class="form-group">
       <label class="control-label">End Date</label>
-      <ui-select name="form-control" ng-model="visualization.options.endDate" class="clearable">
+      <ui-select name="form-control" ng-model="visualization.options.eventConfig.end" class="clearable">
         <ui-select-match allow-clear="true" placeholder="Choose column...">
           {{$select.selected}}
         </ui-select-match>
-        <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventTitle | remove:visualization.options.startDate | remove:visualization.options.groupBy">
+        <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventConfig.title | remove:visualization.options.eventConfig.start | remove:visualization.options.eventConfig.groupBy">
           <span ng-bind-html="column | highlight: $select.search"></span><span> </span>
           <small class="text-muted" ng-bind="columns[column].type"></small>
         </ui-select-choices>
@@ -44,11 +44,11 @@
 
     <div class="form-group">
       <label class="control-label">Group by</label>
-      <ui-select name="groupby" ng-model="visualization.options.groupBy" class="clearable">
+      <ui-select name="groupby" ng-model="visualization.options.eventConfig.groupBy" class="clearable">
         <ui-select-match allow-clear="true" placeholder="Choose column...">
           {{$select.selected}}
         </ui-select-match>
-        <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventTitle | remove:visualization.options.startDate | remove:visualization.options.endDate">
+        <ui-select-choices repeat="column in columnNames | remove:visualization.options.eventConfig.title | remove:visualization.options.eventConfig.start | remove:visualization.options.eventConfig.end">
           <span ng-bind-html="column | highlight: $select.search"></span><span> </span>
           <small class="text-muted" ng-bind="columns[column].type"></small>
         </ui-select-choices>
@@ -63,7 +63,7 @@
       <th>Color</th>
       </thead>
       <tbody>
-      <tr ng-repeat="(name, options) in visualization.options.groups">
+      <tr ng-repeat="(name, options) in visualization.options.eventConfig.groups">
         <td>{{name}}</td>
         <td>
           <input class="form-control" type="color" ng-model="options.color"/>
@@ -75,9 +75,9 @@
 
   <div ng-show="currentTab == 'settings'">
     <!-- not using regular validation (chartEditor.yAxisColumns.$invalid) due to a bug in ui-select with multiple choices-->
-    <div class="form-group" ng-class="{'has-error': !visualization.options.views || visualization.options.views.length == 0}">
+    <div class="form-group" ng-class="{'has-error': !visualization.options.calendarConfig.views || visualization.options.calendarConfig.views.length == 0}">
       <label class="control-label">Available Views</label>
-      <ui-select multiple name="calendarViews" required ng-model="visualization.options.views">
+      <ui-select multiple name="calendarViews" required ng-model="visualization.options.calendarConfig.views">
         <ui-select-match placeholder="Choose views...">{{$item}}</ui-select-match>
         <ui-select-choices repeat="view in calendarViews">
           <span ng-bind-html="view | highlight: $select.search"></span><span> </span>
@@ -87,34 +87,34 @@
 
     <div class="form-group">
       <label class="control-label">First day of the week</label>
-      <select ng-options="day.value as day.name for day in weekDays" ng-model="visualization.options.firstDay"
+      <select ng-options="day.value as day.name for day in weekDays" ng-model="visualization.options.calendarConfig.firstDay"
               class="form-control"></select>
     </div>
 
     <div class="checkbox">
       <label>
-        <input type="checkbox" ng-model="visualization.options.weekends">
+        <input type="checkbox" ng-model="visualization.options.calendarConfig.weekends">
         <i class="input-helper"></i> Show weekends
       </label>
     </div>
 
     <div class="checkbox">
       <label>
-        <input type="checkbox" ng-model="visualization.options.weekNumbers">
+        <input type="checkbox" ng-model="visualization.options.calendarConfig.weekNumbers">
         <i class="input-helper"></i> Show week numbers
       </label>
     </div>
 
     <div class="checkbox">
       <label>
-        <input type="checkbox" ng-model="visualization.options.eventLimit">
+        <input type="checkbox" ng-model="visualization.options.calendarConfig.eventLimit">
         <i class="input-helper"></i> Limit events per day
       </label>
     </div>
 
     <div class="checkbox">
       <label>
-        <input type="checkbox" ng-model="visualization.options.showPopover">
+        <input type="checkbox" ng-model="visualization.options.calendarConfig.showPopover">
         <i class="input-helper"></i> Show event details when pressed
       </label>
     </div>
