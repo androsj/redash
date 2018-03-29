@@ -21,12 +21,12 @@ import ngGridster from 'angular-gridster';
 import { each } from 'underscore';
 
 import '@/lib/sortable';
+import '@/lib/visualizations/calendar';
 
 import * as filters from '@/filters';
 import registerDirectives from '@/directives';
 import markdownFilter from '@/filters/markdown';
 import dateTimeFilter from '@/filters/datetime';
-import '@/visualizations/calendar/calendar';
 
 const logger = debug('redash:config');
 

@@ -9,9 +9,9 @@
 *
 */
 
+import angular from 'angular';
 import $ from 'jquery';
 import moment from 'moment';
-import angular from 'angular';
 import fullCalendar from 'fullcalendar';
 import 'fullcalendar/dist/fullcalendar.css';
 

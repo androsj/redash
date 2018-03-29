@@ -1,7 +1,7 @@
 import { isUndefined, _ } from 'underscore';
 import d3 from 'd3';
 import moment from 'moment';
-import { getColumnCleanName } from '../../services/query-result';
+import { getColumnCleanName } from '@/services/query-result';
 import template from './calendar.html';
 import editorTemplate from './calendar-editor.html';
 
