@@ -74,7 +74,9 @@ function CalendarRenderer(clientConfig) {
       const updateConfig = () => {
         $scope.uiConfig = {
           calendar: {
-            height: 'auto',
+            // height: 'parent',
+            aspectRatio: 2.0,
+            fixedWeekCount: false,
             defaultView: $scope.options.calendarConfig.views[0] || 'month',
             editable: false,
             eventLimit: $scope.options.calendarConfig.eventLimit,
