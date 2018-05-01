@@ -1,11 +1,12 @@
-import { isUndefined, _ } from 'underscore';
 import d3 from 'd3';
 import moment from 'moment';
-import { getColumnCleanName } from '../../services/query-result';
+import { isUndefined, _ } from 'underscore';
+import { isNullOrUndefined } from 'util';
+import { getColumnCleanName } from '@/services/query-result';
 import template from './calendar.html';
 import editorTemplate from './calendar-editor.html';
 
-function CalendarRenderer(clientConfig) {
+function CalendarRenderer(clientConfig, uiCalendarOptions) {
   return {
     restrict: 'E',
     scope: {
@@ -28,13 +29,13 @@ function CalendarRenderer(clientConfig) {
         return '';
       };
 
-      const eventRender = (event, element) => {
+      function eventRender(event, element) {
         // create the child scope for the event elements
         if (eventScope === undefined) {
           eventScope = $scope.$new(true);
         }
 
-        const ignoredKeys = ['0', '1', 'allDay', 'className', 'source', 'title', '_id', '$$hashKey', $scope.options.eventConfig.title, $scope.options.eventConfig.start, isUndefined($scope.options.eventConfig.end) ? 'end' : $scope.options.eventConfig.end];
+        const ignoredKeys = ['0', '1', 'allDay', 'className', 'source', 'title', '_id', '$$hashKey', $scope.options.title, $scope.options.start, isUndefined($scope.options.end) ? 'end' : $scope.options.end];
 
         // Build template
         let popoverTemplate = "'<ul>";
@@ -62,16 +63,16 @@ function CalendarRenderer(clientConfig) {
           newElement.remove();
           newElement = undefined;
         });
-      };
+      }
 
-      const eventDestroy = () => {
+      function eventDestroy() {
         if (eventScope) {
           eventScope.$destroy();
           eventScope = undefined;
         }
-      };
+      }
 
-      const updateConfig = () => {
+      function updateConfig() {
         $scope.uiConfig = {
           calendar: {
             // height: 'parent',
@@ -96,38 +97,30 @@ function CalendarRenderer(clientConfig) {
             },
             ...$scope.options.calendarConfig.showPopover && { eventRender },
             ...$scope.options.calendarConfig.showPopover && { eventDestroy },
-            views: {
-              month: { buttonText: 'Month' },
-              basicWeek: { buttonText: 'Week' },
-              basicDay: { buttonText: 'Day' },
-              agendaWeek: { buttonText: 'Week (Agenda)' },
-              agendaDay: { buttonText: 'Day (Agenda)' },
-              listYear: { buttonText: 'Year (List)' },
-              listMonth: { buttonText: 'Month (List)' },
-              listWeek: { buttonText: 'Week (List)' },
-              listDay: { buttonText: 'Day (List)' },
-            },
+            views: uiCalendarOptions.views,
           },
         };
-      };
+      }
 
       // initialize calendar config
       updateConfig();
 
-      const generateEvents = () => {
+      function generateEvents() {
         const queryData = $scope.queryResult.getData();
         $scope.calendarEvents.length = 0;
 
         if (queryData) {
-          const eventTitle = $scope.options.eventConfig.title;
-          const startDate = $scope.options.eventConfig.start;
-          const endDate = $scope.options.eventConfig.end;
-          const groupBy = $scope.options.eventConfig.groupBy;
+          const eventTitle = $scope.options.title;
+          const startDate = $scope.options.start;
+          const endDate = $scope.options.end;
+          const groupBy = $scope.options.groupBy;
           let groupedEvents;
 
-          if (eventTitle === null || startDate === null) return;
+          // Required fields
+          if (isNullOrUndefined($scope.options.title) || isNullOrUndefined($scope.options.start)) return;
 
-          if (!isUndefined(groupBy)) {
+          // Group events
+          if (!isNullOrUndefined(groupBy)) {
             groupedEvents = _.groupBy(queryData, groupBy);
           } else {
             groupedEvents = { All: queryData };
@@ -135,18 +128,19 @@ function CalendarRenderer(clientConfig) {
 
           const groupNames = _.keys(groupedEvents);
           const options = _.map(groupNames, (group) => {
-            if ($scope.options.eventConfig.groups && $scope.options.eventConfig.groups[group]) {
-              return $scope.options.eventConfig.groups[group];
+            if ($scope.options.groups && $scope.options.groups[group]) {
+              return $scope.options.groups[group];
             }
             return { color: colorScale(group) };
           });
 
-          $scope.options.eventConfig.groups = _.object(groupNames, options);
+          // Groups' colors
+          $scope.options.groups = _.object(groupNames, options);
 
           _.each(groupedEvents, (events, type) => {
             const eventGroup = {
               events: [],
-              color: $scope.options.eventConfig.groups[type].color,
+              color: $scope.options.groups[type].color,
             };
 
             _.each(events, (row) => {
@@ -154,7 +148,12 @@ function CalendarRenderer(clientConfig) {
               const start = row[startDate];
               const end = row[endDate];
 
-              if (title === null || start === null) return;
+              // Skip rows where title is not a string, or start is not a date, or ...
+              if (!_.isString(title) || !moment.isMoment(start) ||
+                // End is mapped, allow nulls, but must be a date if defined
+                (!isNullOrUndefined($scope.options.end) && end !== null && !moment.isMoment(end))) {
+                return;
+              }
 
               const event = {
                 title,
@@ -169,7 +168,7 @@ function CalendarRenderer(clientConfig) {
             $scope.calendarEvents.push(eventGroup);
           });
         }
-      };
+      }
 
       $scope.$on('$destroy', () => {
         if (eventScope) {
@@ -179,14 +178,17 @@ function CalendarRenderer(clientConfig) {
         $scope.calendarEvents.length = 0;
       });
 
-      $scope.$watch('options.eventConfig', generateEvents, true);
+      const rendererTriggers = ['options.title', 'options.start', 'options.end', 'options.groupBy', 'queryResult && queryResult.getData()'];
+
+      $scope.$watchGroup(rendererTriggers, generateEvents);
+      $scope.$watch('options.groups', generateEvents, true);
+
       $scope.$watch('options.calendarConfig', updateConfig, true);
-      $scope.$watch('queryResult && queryResult.getData()', generateEvents);
     },
   };
 }
 
-function CalendarEditor() {
+function CalendarEditor(uiCalendarOptions) {
   return {
     restrict: 'E',
     template: editorTemplate,
@@ -194,26 +196,8 @@ function CalendarEditor() {
       $scope.currentTab = 'general';
       $scope.columns = $scope.queryResult.getColumns();
       $scope.columnNames = _.pluck($scope.columns, 'name');
-      $scope.calendarViews = [
-        'month',
-        'basicWeek',
-        'basicDay',
-        'agendaWeek',
-        'agendaDay',
-        'listYear',
-        'listMonth',
-        'listWeek',
-        'listDay',
-      ];
-      $scope.weekDays = [
-        { name: 'Sunday', value: 0 },
-        { name: 'Monday', value: 1 },
-        { name: 'Tuesday', value: 2 },
-        { name: 'Wednesday', value: 3 },
-        { name: 'Thursday', value: 4 },
-        { name: 'Friday', value: 5 },
-        { name: 'Saturday', value: 6 },
-      ];
+      $scope.calendarViews = uiCalendarOptions.calendarViews;
+      $scope.weekDays = uiCalendarOptions.weekDays;
     },
   };
 }
@@ -240,7 +224,6 @@ export default function init(ngModule) {
           'listWeek',
         ],
       },
-      eventConfig: {},
     };
 
     VisualizationProvider.registerVisualization({
