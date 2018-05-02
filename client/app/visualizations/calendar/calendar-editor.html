@@ -3,8 +3,8 @@
     <li ng-class="{active: currentTab == 'general'}">
       <a ng-click="currentTab='general'">General</a>
     </li>
-    <li ng-class="{active: currentTab == 'groups'}">
-      <a ng-click="currentTab='groups'">Groups</a>
+    <li ng-class="{active: currentTab == 'colors'}">
+      <a ng-click="currentTab='colors'">Colors</a>
     </li>
     <li ng-class="{active: currentTab == 'settings'}">
       <a ng-click="currentTab='settings'">Settings</a>
@@ -90,19 +90,42 @@
     </div>
   </div>
 
-  <div ng-if="currentTab == 'groups'" class="m-t-10 m-b-10">
+  <div ng-if="currentTab == 'colors'" class="m-t-10 m-b-10">
     <table class="table table-condensed col-table">
       <thead>
-      <th>Name</th>
-      <th>Color</th>
+        <tr>
+          <th>Group</th>
+          <th>Background color</th>
+          <th>Border color</th>
+          <th>Text color</th>
+        </tr>
       </thead>
       <tbody>
-      <tr ng-repeat="(name, options) in visualization.options.groups">
-        <td>{{name}}</td>
-        <td>
-          <input class="form-control" type="color" ng-model="options.color"/>
-        </td>
-      </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="visualization.options.matchBackground">
+                <i class="input-helper"></i> Match background color
+              </label>
+            </div>
+          </td>
+          <td></td>
+        </tr>
+        <tr ng-repeat="(name, colors) in visualization.options.groups">
+          <td>{{name}}</td>
+          <td>
+            <input class="form-control" type="color" ng-model="colors.background"/>
+          </td>
+          <td>
+            <input class="form-control" type="color" ng-model="colors.border" ng-disabled="visualization.options.matchBackground"/>
+          </td>
+          <td>
+            <input class="form-control" type="color" ng-model="colors.text"/>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>

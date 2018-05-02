@@ -123,20 +123,30 @@ function CalendarRenderer(clientConfig, uiCalendarOptions) {
           }
 
           const groupNames = _.keys(groupedEvents);
-          const options = _.map(groupNames, (group) => {
+          const colors = _.map(groupNames, (group) => {
             if ($scope.options.groups && $scope.options.groups[group]) {
               return $scope.options.groups[group];
             }
-            return { color: colorScale(group) };
+
+            const newColor = colorScale(group);
+
+            return {
+              background: newColor,
+              border: newColor,
+              text: '#ffffff',
+            };
           });
 
           // Groups' colors
-          $scope.options.groups = _.object(groupNames, options);
+          $scope.options.groups = _.object(groupNames, colors);
 
           _.each(groupedEvents, (events, type) => {
             const eventGroup = {
               events: [],
-              color: $scope.options.groups[type].color,
+              backgroundColor: $scope.options.groups[type].background,
+              borderColor: $scope.options.matchBackground
+                ? $scope.options.groups[type].background : $scope.options.groups[type].border,
+              textColor: $scope.options.groups[type].text,
             };
 
             _.each(events, (row) => {
@@ -176,7 +186,8 @@ function CalendarRenderer(clientConfig, uiCalendarOptions) {
 
       // Re-render calendar
       const rendererTriggers = ['options.title', 'options.start', 'options.end', 'options.groupBy',
-        'options.calendarConfig.showTooltips', 'options.tooltipItems', 'queryResult && queryResult.getData()'];
+        'options.calendarConfig.showTooltips', 'options.tooltipItems', 'options.matchBackground',
+        'queryResult && queryResult.getData()'];
 
       $scope.$watchGroup(rendererTriggers, generateEvents);
       $scope.$watch('options.groups', generateEvents, true);
@@ -224,6 +235,7 @@ export default function init(ngModule) {
           'listWeek',
         ],
       },
+      matchBackground: true,
       tooltipItems: [],
     };
 
