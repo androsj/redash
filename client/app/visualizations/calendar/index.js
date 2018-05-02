@@ -1,6 +1,6 @@
 import d3 from 'd3';
 import moment from 'moment';
-import { isUndefined, _ } from 'underscore';
+import { _ } from 'underscore';
 import { isNullOrUndefined } from 'util';
 import { getColumnCleanName } from '@/services/query-result';
 import template from './calendar.html';
@@ -22,47 +22,43 @@ function CalendarRenderer(clientConfig, uiCalendarOptions) {
       // Compile events with popover attributes into this child scope so we can destroy them later.
       let eventScope;
 
-      const nullToEmptyString = (value) => {
-        if (value !== null) {
-          return value;
-        }
-        return '';
-      };
-
       function eventRender(event, element) {
-        // create the child scope for the event elements
-        if (eventScope === undefined) {
-          eventScope = $scope.$new(true);
-        }
-
-        const ignoredKeys = ['0', '1', 'allDay', 'className', 'source', 'title', '_id', '$$hashKey', $scope.options.title, $scope.options.start, isUndefined($scope.options.end) ? 'end' : $scope.options.end];
-
-        // Build template
-        let popoverTemplate = "'<ul>";
-        _.each(event, (value, key) => {
-          if (!ignoredKeys.includes(key)) {
-            key = getColumnCleanName(key);
-
-            popoverTemplate += `<li><strong>${key}:</strong>
-            ${moment.isMoment(value) ? value.format(clientConfig.dateTimeFormat) : nullToEmptyString(value)}</li>`;
+        if ($scope.options.calendarConfig.showTooltips) {
+          // create the child scope for the event elements
+          if (eventScope === undefined) {
+            eventScope = $scope.$new(true);
           }
-        });
-        popoverTemplate += "</ul>'";
 
-        element.attr({
-          'uib-popover-html': popoverTemplate,
-          'popover-title': event.title,
-          'popover-trigger': "'outsideClick'",
-          'popover-placement': 'auto top-left',
-          'popover-append-to-body': true,
-        });
+          // Build template
+          let tooltipTemplate = "'<ul>";
 
-        let newElement = $compile(element)(eventScope);
+          _.each($scope.options.tooltipItems, (column) => {
+            const cleanColumn = getColumnCleanName(column);
 
-        eventScope.$on('$destroy', () => {
-          newElement.remove();
-          newElement = undefined;
-        });
+            // Change nulls to empty strings
+            const value = _.isNull(event[column]) ? '' : event[column];
+
+            tooltipTemplate += `<li><strong>${cleanColumn}: </strong>`;
+            tooltipTemplate += `${moment.isMoment(value) ? value.format(clientConfig.dateTimeFormat) : value}</li>`;
+          });
+
+          tooltipTemplate += "</ul>'";
+
+          element.attr({
+            'uib-popover-html': tooltipTemplate,
+            'popover-title': event.title,
+            'popover-trigger': "'outsideClick'",
+            'popover-placement': 'auto top-left',
+            'popover-append-to-body': true,
+          });
+
+          let newElement = $compile(element)(eventScope);
+
+          eventScope.$on('$destroy', () => {
+            newElement.remove();
+            newElement = undefined;
+          });
+        }
       }
 
       function eventDestroy() {
@@ -95,8 +91,8 @@ function CalendarRenderer(clientConfig, uiCalendarOptions) {
               prev: ' fa fa-chevron-left',
               next: ' fa fa-chevron-right',
             },
-            ...$scope.options.calendarConfig.showPopover && { eventRender },
-            ...$scope.options.calendarConfig.showPopover && { eventDestroy },
+            ...$scope.options.calendarConfig.showTooltips && $scope.options.tooltipItems.length > 0 && { eventRender },
+            ...$scope.options.calendarConfig.showTooltips && $scope.options.tooltipItems.length > 0 && { eventDestroy },
             views: uiCalendarOptions.views,
           },
         };
@@ -178,12 +174,16 @@ function CalendarRenderer(clientConfig, uiCalendarOptions) {
         $scope.calendarEvents.length = 0;
       });
 
-      const rendererTriggers = ['options.title', 'options.start', 'options.end', 'options.groupBy', 'queryResult && queryResult.getData()'];
+      // Re-render calendar
+      const rendererTriggers = ['options.title', 'options.start', 'options.end', 'options.groupBy',
+        'options.calendarConfig.showTooltips', 'options.tooltipItems', 'queryResult && queryResult.getData()'];
 
       $scope.$watchGroup(rendererTriggers, generateEvents);
       $scope.$watch('options.groups', generateEvents, true);
 
+      // Keep config object updated
       $scope.$watch('options.calendarConfig', updateConfig, true);
+      $scope.$watchCollection('options.tooltipItems', updateConfig);
     },
   };
 }
@@ -214,7 +214,7 @@ export default function init(ngModule) {
       calendarConfig: {
         eventLimit: false,
         firstDay: 0,
-        showPopover: true,
+        showTooltips: true,
         weekends: true,
         weekNumbers: false,
         views: [
@@ -224,6 +224,7 @@ export default function init(ngModule) {
           'listWeek',
         ],
       },
+      tooltipItems: [],
     };
 
     VisualizationProvider.registerVisualization({
