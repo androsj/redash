@@ -136,9 +136,9 @@
       <div class="form-group col-sm-6" ng-class="{'has-error': !visualization.options.calendarConfig.views || visualization.options.calendarConfig.views.length == 0}">
         <label class="control-label">Available views</label>
         <ui-select multiple name="calendarViews" required ng-model="visualization.options.calendarConfig.views">
-          <ui-select-match placeholder="Choose views...">{{$item}}</ui-select-match>
-          <ui-select-choices repeat="view in calendarViews">
-            <span ng-bind-html="view | highlight: $select.search"></span><span> </span>
+          <ui-select-match placeholder="Choose views...">{{$item.name}}</ui-select-match>
+          <ui-select-choices group-by="'type'" repeat="view.value as view in calendarViews">
+            <span ng-bind-html="view.name | highlight: $select.search"></span><span> </span>
           </ui-select-choices>
         </ui-select>
       </div>

@@ -22,15 +22,15 @@ const uiCalendarConfig = {
 function uiCalendarOptions() {
   return {
     calendarViews: [
-      'month',
-      'basicWeek',
-      'basicDay',
-      'agendaWeek',
-      'agendaDay',
-      'listYear',
-      'listMonth',
-      'listWeek',
-      'listDay',
+      { name: 'Month', value: 'month', type: 'basic' },
+      { name: 'Week', value: 'basicWeek', type: 'basic' },
+      { name: 'Day', value: 'basicDay', type: 'basic' },
+      { name: 'Week (agenda)', value: 'agendaWeek', type: 'agenda' },
+      { name: 'Day (agenda)', value: 'agendaDay', type: 'agenda' },
+      { name: 'Year (list)', value: 'listYear', type: 'list' },
+      { name: 'Month (list)', value: 'listMonth', type: 'list' },
+      { name: 'Week (list)', value: 'listWeek', type: 'list' },
+      { name: 'Day (list)', value: 'listDay', type: 'list' },
     ],
     weekDays: [
       { name: 'Sunday', value: 0 },
@@ -46,12 +46,12 @@ function uiCalendarOptions() {
       month: { buttonText: 'Month' },
       basicWeek: { buttonText: 'Week' },
       basicDay: { buttonText: 'Day' },
-      agendaWeek: { buttonText: 'Week (Agenda)' },
-      agendaDay: { buttonText: 'Day (Agenda)' },
-      listYear: { buttonText: 'Year (List)' },
-      listMonth: { buttonText: 'Month (List)' },
-      listWeek: { buttonText: 'Week (List)' },
-      listDay: { buttonText: 'Day (List)' },
+      agendaWeek: { buttonText: 'Week (agenda)' },
+      agendaDay: { buttonText: 'Day (agenda)' },
+      listYear: { buttonText: 'Year (list)' },
+      listMonth: { buttonText: 'Month (list)' },
+      listWeek: { buttonText: 'Week (list)' },
+      listDay: { buttonText: 'Day (list)' },
     },
   };
 }
